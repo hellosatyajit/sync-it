@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: sync-it-relay
+    runtime: docker
+    healthCheckPath: /health
+    envVars:
+      - key: SYNCIT_DATA_FILE
+        value: /var/data/syncit.json
+    disk:
+      name: syncit-data
+      mountPath: /var/data
+      sizeGB: 1

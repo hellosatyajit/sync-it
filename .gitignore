@@ -1,0 +1,7 @@
+.DS_Store
+.build/
+macos/dist/
+**/.gradle/
+**/build/
+relay/data.json
+*.xcuserstate

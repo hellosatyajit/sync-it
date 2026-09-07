@@ -1,0 +1,13 @@
+{
+  "name": "sync-it-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Opaque encrypted message relay for Sync It",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" }
+}
+
