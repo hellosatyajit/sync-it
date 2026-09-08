@@ -3,7 +3,9 @@ package app.syncit.android
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.util.Base64
 import androidx.core.content.FileProvider
 import java.io.ByteArrayOutputStream
@@ -38,6 +40,21 @@ object ClipboardBridge {
         return ClipboardPayload(UUID.randomUUID().toString(), "text", text, System.currentTimeMillis())
     }
 
+    fun captureShare(context: Context, intent: Intent): ClipboardPayload? {
+        if (intent.action != Intent.ACTION_SEND) return null
+        val uri = sharedUri(intent)
+        if (uri != null) {
+            val type = intent.type?.takeIf { it.startsWith("image/") }
+                ?: context.contentResolver.getType(uri)?.takeIf { it.startsWith("image/") }
+            if (type != null) {
+                val bytes = readLimited(context, uri)
+                return ClipboardPayload(UUID.randomUUID().toString(), type, Base64.encodeToString(bytes, Base64.NO_WRAP), System.currentTimeMillis())
+            }
+        }
+        val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()?.takeIf { it.isNotEmpty() } ?: return null
+        return ClipboardPayload(UUID.randomUUID().toString(), "text", text, System.currentTimeMillis())
+    }
+
     fun apply(context: Context, payload: ClipboardPayload) {
         val manager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         if (payload.type == "text") {
@@ -48,5 +65,26 @@ object ClipboardBridge {
             val uri: Uri = FileProvider.getUriForFile(context, context.packageName + ".files", file)
             manager.setPrimaryClip(ClipData.newUri(context.contentResolver, "Synced image from Mac", uri))
         }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun sharedUri(intent: Intent): Uri? = if (Build.VERSION.SDK_INT >= 33) {
+        intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+    } else {
+        intent.getParcelableExtra(Intent.EXTRA_STREAM)
+    }
+
+    private fun readLimited(context: Context, uri: Uri): ByteArray {
+        return context.contentResolver.openInputStream(uri)?.use { input ->
+            val output = ByteArrayOutputStream()
+            val buffer = ByteArray(16 * 1024)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                output.write(buffer, 0, count)
+                require(output.size() <= MAX_BYTES) { "Image is larger than 6 MiB" }
+            }
+            output.toByteArray()
+        } ?: error("The shared image could not be opened")
     }
 }

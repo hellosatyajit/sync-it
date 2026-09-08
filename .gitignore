@@ -3,5 +3,6 @@
 macos/dist/
 **/.gradle/
 **/build/
+android/local.properties
 relay/data.json
 *.xcuserstate

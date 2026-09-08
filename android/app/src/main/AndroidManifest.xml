@@ -10,7 +10,32 @@
         android:label="Sync It"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false">
-        <activity android:name=".SendClipboardActivity" android:excludeFromRecents="true" android:theme="@style/SendClipboardTheme" />
+        <activity
+            android:name=".SendClipboardActivity"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/SendClipboardTheme" />
+        <activity
+            android:name=".ShareReceiverActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="Send to Mac"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/SendClipboardTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,4 +52,3 @@
         </provider>
     </application>
 </manifest>
-

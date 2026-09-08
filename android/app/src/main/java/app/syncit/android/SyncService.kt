@@ -21,12 +21,18 @@ class SyncService : Service() {
         super.onCreate()
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel(CHANNEL, "Clipboard sync", NotificationManager.IMPORTANCE_LOW))
-        val sendIntent = PendingIntent.getActivity(this, 0, Intent(this, SendClipboardActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val openIntent = PendingIntent.getActivity(this, 1, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val sendAction = Intent(this, SendClipboardActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
+        }
+        val sendIntent = PendingIntent.getActivity(this, 0, sendAction, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val settingsIntent = PendingIntent.getActivity(this, 1, Intent(this, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         val notification = NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(android.R.drawable.stat_notify_sync).setContentTitle("Sync It is connected")
-            .setContentText("Tap Send clipboard when Sync It is in the background")
-            .setContentIntent(openIntent).addAction(0, "Send clipboard", sendIntent).setOngoing(true).build()
+            .setContentText("Tap to send your clipboard now")
+            .setContentIntent(sendIntent)
+            .addAction(0, "Send clipboard", sendIntent)
+            .addAction(0, "Settings", settingsIntent)
+            .setOngoing(true).build()
         startForeground(NOTIFICATION, notification)
         scope.launch {
             val relay = RelayClient(this@SyncService)
@@ -44,4 +50,3 @@ class SyncService : Service() {
     override fun onDestroy() { scope.cancel(); super.onDestroy() }
     override fun onBind(intent: Intent?): IBinder? = null
 }
-

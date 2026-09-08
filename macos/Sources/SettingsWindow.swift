@@ -1,7 +1,8 @@
 import AppKit
 
 @MainActor
-final class SettingsWindowController: NSWindowController {
+final class SettingsWindowController: NSWindowController, NSWindowDelegate {
+    var onClose: (() -> Void)?
     private let relayField = NSTextField()
     private let phraseField = NSSecureTextField()
     private let engine: SyncEngine
@@ -11,7 +12,9 @@ final class SettingsWindowController: NSWindowController {
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 230), styleMask: [.titled, .closable], backing: .buffered, defer: false)
         window.title = "Sync It Settings"
         window.center()
+        window.isReleasedWhenClosed = false
         super.init(window: window)
+        window.delegate = self
         buildUI()
     }
 
@@ -47,5 +50,8 @@ final class SettingsWindowController: NSWindowController {
         engine.configure(relayURL: relayField.stringValue, phrase: phraseField.stringValue)
         close()
     }
-}
 
+    func windowWillClose(_ notification: Notification) {
+        onClose?()
+    }
+}

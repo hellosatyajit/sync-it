@@ -30,15 +30,22 @@ open "dist/Sync It.app"
 
 Open **Settings…** from the menu-bar icon and enter the HTTPS relay URL and the same pairing phrase used on Android. The script creates an ad-hoc signed app for this Mac. To distribute it to other people, sign and notarize it with an Apple Developer identity in Xcode.
 
-### Optional: use it from Raycast
-
-Add this repository's `raycast/` directory under **Raycast → Extensions → Script Commands → Add Directories**. Raycast will expose **Send Clipboard with Sync It** and **Open Sync It Settings**. The Mac app must be installed/opened once so macOS registers its `syncit://` actions.
-
 ### 3. Run the Android app
 
 Open `android/` in Android Studio, run it on the phone, then enter the relay URL and pairing phrase. Tap **Start sync**. While Android shows the app, clipboard changes are sent automatically. When it is in the background, tap **Send clipboard** in the persistent notification.
 
+To build an installable debug APK from the terminal, use Java 17:
+
+```bash
+cd android
+JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home ./gradlew assembleDebug
+```
+
+The APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
+
 Android 13+ may ask for notification permission. Images copied by some apps are exposed as private content URIs; Sync It reads them immediately when allowed, but a source app can still deny access.
+
+You can also send screenshots, images, links, or selected text through Android's Share Sheet: tap **Share**, choose **Send to Mac**, and Sync It sends the item directly to the Mac clipboard.
 
 ## Pairing and privacy
 
